@@ -18,5 +18,54 @@
         </header>
         <main class="flex flex-col w-full h-[94%] lg:flex-row text-slate-50">
             <section class="lg:w-[25%] lg:h-full w-full h-[26%] flex flex-col gap-1.5 bg-slate-800">
-                <h2 class="text-center text-lg lg:text-base font-bold mt-0.5">Select one of the options for weather information</h2>
-                
+                <h2 class="text-center text-lg lg:text-base font-bold mt-0.5">Select options for weather information</h2>
+                <div class="radio_btns flex items-center justify-center gap-4 mt-1.5">
+                    <div class="flex items-center gap-1">
+                        <input type="radio" name="location" id="city" title="Select city" class="cursor-pointer" />
+                        <label for="city" class="cursor-pointer">City</label>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <input checked type="radio" name="location" id="current_location"
+                            title="Select your current location" class="cursor-pointer" />
+                        <label for="current_location" class="cursor-pointer">Current Location</label>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center justify-center relative">
+                    <input type="search" placeholder="Enter city name" id="city_input"
+                        class="w-[90%] px-4 py-2 rounded-full bg-white/10 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300" />
+                    <div id="dropdown"
+                        class="hidden absolute top-12 left-5 w-[90%] px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md">
+                        <ul id="dropdown_cities" class="text-white">
+                        </ul>
+                    </div>
+                </div>
+                <div class="search self-center">
+                    <button id="search" type="button" title="Search weather"
+                        class="py-2 px-6 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-all duration-300 hover-scale">Search</button>
+                </div>
+            </section>
+            <section class="lg:w-[75%] lg:h-full w-full h-[68%] glass-effect rounded-xl p-4 custom-shadow">
+                <div class="flex items-center justify-between p-6 bg-white/10 rounded-xl hover-scale transition-all duration-300">
+                    <div class="information">
+                        <h3 id="city_name" class="text-2xl font-medium mb-3"></h3>
+                        <p id="temp" class="text-lg mb-2"></p>
+                        <p id="wind" class="text-lg mb-2"></p>
+                        <p id="humidity" class="text-lg"></p>
+                    </div>
+                    <div class="img">
+                        <img id="weather_img" src="" alt="" width="120" height="120" class="drop-shadow-lg" />
+                        <p id="weather_description" class="text-center mt-2 text-lg"></p>
+                    </div>
+                </div>
+                <div class="flex flex-col mt-8 gap-4">
+                    <h3 class="text-2xl font-medium">5-Days Forecast <span class="text-sm font-normal text-gray-300">(Powered by OpenWeatherMap)</span></h3>
+                    <div id="card_container" class="flex items-center gap-4 overflow-x-auto pb-4">
+                        <!-- dynamically generated cards will be displayed here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>
