@@ -1,4 +1,4 @@
-// Getting the elements:-
+// Selecting all necessary HTML elements for manipulation
 const radioCity = document.getElementById("city");
 const radioCurrentLocation = document.getElementById("current_location");
 const cityInput = document.getElementById("city_input");
@@ -14,15 +14,15 @@ const cardContainer = document.getElementById("card_container");
 const dropdownCities = document.getElementById("dropdown_cities");
 const gitHub = document.getElementById("github_btn");
 
-// Adding event listener to the GitHub button:-
+// Implementing GitHub Button Event Listener
 gitHub.addEventListener("click", () => {
     window.open("https://github.com/indrakhichaki-16", "_blank");
 })
 
-// Declaring empty array to store the city names for dropdown_menu:-
+// Local Storage Setup - initialize or retrieve city names list from local storage
 let cityNamesList = JSON.parse(localStorage.getItem("cityNamesList")) || [];
 
-// Toggle the visibility of the input field based on the selected radio button:-
+// Radio Button Toggle Function - toggles the visibility of city input field based on the selection
 const toggle_city = () => {
     if (radioCity.checked) {
         cityInput.style.display = "block";
@@ -31,11 +31,14 @@ const toggle_city = () => {
     }
 };
 
+// Initial call to set correct input field visibility
 toggle_city();
+
+// Add event listeners for radio button changes
 radioCity.addEventListener("change", toggle_city);
 radioCurrentLocation.addEventListener("change", toggle_city);
 
-// toggling the dropdown menu:-
+// Handles the city search input and dropdown display
 cityInput.addEventListener("input", () => {
     const inputValue = cityInput.value.trim().toLowerCase();
 
@@ -44,16 +47,17 @@ cityInput.addEventListener("input", () => {
         city.toLowerCase().startsWith(inputValue)
     );
 
-    // Display the dropdown menu if there are matching cities:-
+    // Display dropdown if matching cities are found
     if (filteredCities.length > 0) {
         dropDown.style.display = "block";
         dropdownCities.innerHTML = "";
 
+        // Create list items for each matching city
         filteredCities.forEach((city) => {
             dropdownCities.innerHTML += `<li class="cursor-pointer p-1 rounded hover:bg-slate-300">${city}</li>`;
         });
 
-        // Adding event listener to the dropdown menu:-
+        // Add click event listener to dropdown items
         dropdownCities.querySelectorAll("li").forEach((li) => {
             li.addEventListener("click", () => {
                 cityInput.value = li.textContent;
@@ -65,20 +69,20 @@ cityInput.addEventListener("input", () => {
     }
 });
 
-// Hiding the dropdown menu when clicking outside of it:-
+// Closes the dropdown when clicking outside
 document.addEventListener("click", (e) => {
     if (!dropDown.contains(e.target) && e.target !== cityInput) {
         dropDown.style.display = "none";
     }
 });
 
-// ====== OpenWeatherMap 5-day Forecast Integration ======
-// Replace 'YOUR_OPENWEATHERMAP_API_KEY' with your actual API key from https://openweathermap.org/appid
+// OpenWeatherMap API Configuration - API key for OpenWeatherMap service
 const OPENWEATHERMAP_API_KEY = '19babf6ebd4152ad29b72e684571a678';
 
-// Helper to get daily forecast from 3-hourly data
+// Processes 3-hourly forecast data to get daily forecasts
 function getDailyForecast(list) {
     const days = {};
+    // Group forecasts by date
     list.forEach(item => {
         const date = item.dt_txt.split(' ')[0];
         if (!days[date]) {
@@ -86,7 +90,7 @@ function getDailyForecast(list) {
         }
         days[date].push(item);
     });
-    // For each day, pick the forecast closest to 12:00
+    // For each day, select forecast closest to 12:00
     return Object.values(days).slice(0, 5).map(dayArr => {
         let target = dayArr.reduce((prev, curr) => {
             return Math.abs(new Date(curr.dt_txt).getHours() - 12) < Math.abs(new Date(prev.dt_txt).getHours() - 12) ? curr : prev;
@@ -95,7 +99,7 @@ function getDailyForecast(list) {
     });
 }
 
-// Simplified error handling function
+// Error Handling Function - displays error message
 const handleError = (error) => {
     console.error(error);
     
@@ -108,7 +112,7 @@ const handleError = (error) => {
     weatherDescription.innerHTML = '';
     cardContainer.innerHTML = '';
 
-    // Display error message
+    // Create and display error message
     const errorDiv = document.createElement('div');
     errorDiv.className = 'text-center p-4 bg-red-500/20 rounded-lg text-white';
     errorDiv.innerHTML = `
@@ -118,8 +122,10 @@ const handleError = (error) => {
     cardContainer.appendChild(errorDiv);
 };
 
+// Fetches weather data for a specific city
 const getWeatherByCityName = async (city = "kolkata") => {
     try {
+        // Fetch weather data from OpenWeatherMap API
         const response = await fetch(
             `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${OPENWEATHERMAP_API_KEY}&units=metric`
         );
@@ -131,10 +137,10 @@ const getWeatherByCityName = async (city = "kolkata") => {
         const data = await response.json();
         if (data.cod !== "200") throw new Error('Invalid API key');
 
-        // Clear any previous error messages
+        // Clear previous error messages
         cardContainer.innerHTML = '';
 
-        // Current weather (from first item)
+        // Update current weather information
         const current = data.list[0];
         cityName.innerHTML = `${data.city.name} (${current.dt_txt.split(' ')[0]})`;
         temp.innerHTML = `Temperature: <span class="font-normal">${current.main.temp}<sup>o</sup> C</span>`;
@@ -144,7 +150,7 @@ const getWeatherByCityName = async (city = "kolkata") => {
         weatherImg.alt = current.weather[0].description;
         weatherDescription.innerHTML = current.weather[0].description;
 
-        // 5-day forecast
+        // Generate 5-day weather forecast
         const daily = getDailyForecast(data.list);
         daily.forEach(item => {
             cardContainer.innerHTML += `<div class="forecast-card min-w-[200px] flex flex-col items-center justify-center gap-1 bg-white/10 backdrop-blur-sm text-white rounded-lg py-2 px-4">
@@ -160,8 +166,10 @@ const getWeatherByCityName = async (city = "kolkata") => {
     }
 };
 
+// Fetches weather data for current location
 const getWeatherByCurrentLocation = async (latitude, longitude) => {
     try {
+        // Fetch weather data using coordinates
         const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${OPENWEATHERMAP_API_KEY}&units=metric`);
         
         if (!response.ok) {
@@ -171,10 +179,10 @@ const getWeatherByCurrentLocation = async (latitude, longitude) => {
         const data = await response.json();
         if (data.cod !== "200") throw new Error('Invalid API key');
 
-        // Clear any previous error messages
+        // Clear previous error messages
         cardContainer.innerHTML = '';
 
-        // Current weather (from first item)
+        // Update current weather information
         const current = data.list[0];
         cityName.innerHTML = `${data.city.name} (${current.dt_txt.split(' ')[0]})`;
         temp.innerHTML = `Temperature: <span class="font-normal">${current.main.temp}<sup>o</sup> C</span>`;
@@ -184,7 +192,7 @@ const getWeatherByCurrentLocation = async (latitude, longitude) => {
         weatherImg.alt = current.weather[0].description;
         weatherDescription.innerHTML = current.weather[0].description;
 
-        // 5-day forecast
+        // Generate 5-day weather forecast
         const daily = getDailyForecast(data.list);
         daily.forEach(item => {
             cardContainer.innerHTML += `<div class="forecast-card min-w-[200px] flex flex-col items-center justify-center gap-1 bg-white/10 backdrop-blur-sm text-white rounded-lg py-2 px-4">
@@ -200,25 +208,26 @@ const getWeatherByCurrentLocation = async (latitude, longitude) => {
     }
 };
 
-// Adding event listener to the search button for calling the weather api:-
+// Search Button Event Listener
 searchButton.addEventListener("click", (e) => {
     e.preventDefault();
     if (radioCity.checked) {
         const cityName = cityInput.value.trim().toLowerCase();
 
-        // Adding validation before searching the city:-
+        // Validate city input
         if (!cityName) {
             handleError(new Error('Invalid API key'));
             return;
         }
 
-        // Storing the only city names which are not present in dropdown menu:-
+        // Store new city names in local storage
         if (!cityNamesList.includes(cityName)) {
             cityNamesList.push(cityName);
             localStorage.setItem("cityNamesList", JSON.stringify(cityNamesList));
         }
         getWeatherByCityName(cityName);
     } else {
+        // Handle current location weather
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
