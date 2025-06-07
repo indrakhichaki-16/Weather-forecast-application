@@ -16,7 +16,7 @@ const gitHub = document.getElementById("github_btn");
 
 // Implementing GitHub Button Event Listener
 gitHub.addEventListener("click", () => {
-    window.open("https://github.com/indrakhichaki-16", "_blank");
+    window.open("https://github.com/indrakhichaki-16/Weather-forecast-application/tree/main", "_blank");
 })
 
 // Local Storage Setup - initialize or retrieve city names list from local storage
