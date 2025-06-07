@@ -1,71 +1,175 @@
+<!-- This project has been uploaded on GITHUB -->
+
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Weather Forecast App</title>
-</head>
+    <head>
 
-<body>
-    <div class="wrapper w-screen h-screen">
-        <header class="flex items-center w-full h-[6%] bg-slate-950 text-slate-50">
-            <nav class="flex items-center justify-center gap-10 sm:gap-52 w-full py-0.5 px-1.5">
-                <div class="logo">
-                    <h1 class="sm:text-lg drop-shadow-[1px_1px_1px_#fff]">Weather Forecast</h1>
+        <!-- Meta charset and viewport meta -->
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <!-- Importing the Github icon -->
+        <script src="https://kit.fontawesome.com/a879116811.js" crossorigin="anonymous"></script>
+
+        <!-- Importing Tailwind CSS CDN -->
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <!-- External Javascript file -->
+        <script defer src="script.js"></script>
+
+        <!-- Link for favicon -->
+        <link rel="icon" href="icon.png"/>
+
+        <!-- Title of webpage -->
+        <title>Weather Forecast App</title> 
+
+        <!-- Inline CSS -->
+        <style>
+
+            /* Animation effect of heading */
+            @keyframes expand { 
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+            .animate-expand {
+                animation: expand 2s ease-in-out infinite;
+            }
+
+            /* Styling all the containers */
+            .glass-effect {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            /*Shadow effect on body*/
+            .custom-shadow {
+                box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            }
+
+            /* Hover effect on today's weather forecast */
+            .hover-scale {
+                transition: transform 0.5s ease;
+            }
+            .hover-scale:hover {
+                transform: scale(1.02);
+            }
+
+            /* Hover effect on 5 days weather forecast */
+            .forecast-card {
+                transition: all 0.3s ease;
+                transform-origin: bottom;
+            }
+            .forecast-card:hover {
+                transform: translateY(-10px);
+            }
+            @keyframes float {
+                0% { transform: translateY(0px); }
+                50% { transform: translateY(-10px); }
+                100% { transform: translateY(0px); }
+            }
+
+            /* Animation effect on weather icon */
+            .weather-icon-animate {
+                animation: float 2s ease-in-out infinite;
+            }
+
+            /* Responsive styles */
+            @media (max-width: 768px) {
+                .forecast-card {
+                    min-width: 160px !important;
+                }
+            }
+            @media (max-width: 375px) {
+                .forecast-card {
+                    min-width: 140px !important;
+                }
+            }
+
+        </style>
+
+    </head>
+
+    <body class="min-h-screen text-gray-100 bg-gradient-to-br from-blue-900 via-cyan-800 to-blue-600">
+
+        <div class="wrapper w-screen h-screen">
+
+            <!-- Header section -->
+            <header class="flex items-center justify-between w-full h-[6%] glass-effect px-2 sm:px-4">
+                <!-- Heading of webpage -->
+                <div class="w-1/3"></div>
+                <div class="logo text-center w-1/3">
+                    <h1 class="text-lg sm:text-2xl font-bold tracking-wider animate-expand text-white hover:drop-shadow-[0_0_8px_#93c5fd] transition-all duration-300">Weather Forecast</h1>
                 </div>
-            </nav>
-        </header>
-        <main class="flex flex-col w-full h-[94%] lg:flex-row text-slate-50">
-            <section class="lg:w-[25%] lg:h-full w-full h-[26%] flex flex-col gap-1.5 bg-slate-800">
-                <h2 class="text-center text-lg lg:text-base font-bold mt-0.5">Select options for weather information</h2>
-                <div class="radio_btns flex items-center justify-center gap-4 mt-1.5">
-                    <div class="flex items-center gap-1">
-                        <input type="radio" name="location" id="city" title="Select city" class="cursor-pointer" />
-                        <label for="city" class="cursor-pointer">City</label>
-                    </div>
-                    <div class="flex items-center gap-1">
-                        <input checked type="radio" name="location" id="current_location"
-                            title="Select your current location" class="cursor-pointer" />
-                        <label for="current_location" class="cursor-pointer">Current Location</label>
-                    </div>
+                <!-- Path to Github repository -->
+                <div class="w-1/3 flex justify-end">
+                    <button id="github_btn" type="button" title="Visit GitHub"
+                        class="cursor-pointer flex items-center gap-1 rounded-full bg-white/10 text-white pl-2 pr-3 sm:pl-3 sm:pr-4 py-1 sm:py-1.5 hover:bg-white/20 transition-all duration-300">
+                        <i class="fa-brands fa-lg fa-github"></i>
+                        <span class="hidden sm:inline">Github</span>
+                    </button>
                 </div>
-                <div class="flex flex-col items-center justify-center relative">
-                    <input type="search" placeholder="Enter city name" id="city_input"
-                        class="w-[90%] px-4 py-2 rounded-full bg-white/10 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300" />
-                    <div id="dropdown"
-                        class="hidden absolute top-12 left-5 w-[90%] px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md">
-                        <ul id="dropdown_cities" class="text-white">
-                        </ul>
+            </header>
+
+            <main class="flex flex-col w-full h-[94%] lg:flex-row text-gray-100 p-2 sm:p-4 gap-2 sm:gap-4">
+                <!-- Weather information section -->
+                <section class="lg:w-[25%] lg:h-full w-full h-[26%] flex flex-col gap-2 sm:gap-4 glass-effect rounded-xl p-2 sm:p-4 custom-shadow">
+                    <h2 class="text-center text-base sm:text-xl font-medium">Weather Information</h2>
+                    <!-- Implementing radio buttons to select options -->
+                    <div class="radio_btns flex items-center justify-center gap-4 sm:gap-6 mt-1 sm:mt-2">
+                        <div class="flex items-center gap-1 sm:gap-2">
+                            <input type="radio" name="location" id="city" title="Select city" class="cursor-pointer accent-blue-400" />
+                            <label for="city" class="cursor-pointer text-sm sm:text-base">City</label>
+                        </div>
+                        <div class="flex items-center gap-1 sm:gap-2">
+                            <input checked type="radio" name="location" id="current_location"
+                            title="Select your current location" class="cursor-pointer accent-blue-400" />
+                            <label for="current_location" class="cursor-pointer text-sm sm:text-base">Current Location</label>
+                        </div>
                     </div>
-                </div>
-                <div class="search self-center">
-                    <button id="search" type="button" title="Search weather"
-                        class="py-2 px-6 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-all duration-300 hover-scale">Search</button>
-                </div>
-            </section>
-            <section class="lg:w-[75%] lg:h-full w-full h-[68%] glass-effect rounded-xl p-4 custom-shadow">
-                <div class="flex items-center justify-between p-6 bg-white/10 rounded-xl hover-scale transition-all duration-300">
-                    <div class="information">
-                        <h3 id="city_name" class="text-2xl font-medium mb-3"></h3>
-                        <p id="temp" class="text-lg mb-2"></p>
-                        <p id="wind" class="text-lg mb-2"></p>
-                        <p id="humidity" class="text-lg"></p>
+                    <div class="flex flex-col items-center justify-center relative">
+                        <!-- Input field and dropdown list -->
+                        <input type="search" placeholder="Enter city name" id="city_input"
+                        class="w-[90%] px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/10 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 text-sm sm:text-base" />
+                        <div id="dropdown"
+                        class="hidden absolute top-10 sm:top-12 left-5 w-[90%] px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-white/10 backdrop-blur-md">
+                            <ul id="dropdown_cities" class="text-white text-sm sm:text-base"></ul>
+                        </div>
                     </div>
-                    <div class="img">
-                        <img id="weather_img" src="" alt="" width="120" height="120" class="drop-shadow-lg" />
-                        <p id="weather_description" class="text-center mt-2 text-lg"></p>
+                    <!-- Search button -->
+                    <div class="search self-center">
+                        <button id="search" type="button" title="Search weather"
+                        class="py-1.5 sm:py-2 px-4 sm:px-6 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-all duration-300 hover-scale text-sm sm:text-base">Search</button>
                     </div>
-                </div>
-                <div class="flex flex-col mt-8 gap-4">
-                    <h3 class="text-2xl font-medium">5-Days Forecast <span class="text-sm font-normal text-gray-300">(Powered by OpenWeatherMap)</span></h3>
-                    <div id="card_container" class="flex items-center gap-4 overflow-x-auto pb-4">
-                        <!-- dynamically generated cards will be displayed here -->
+                </section>
+
+                <section class="lg:w-[75%] lg:h-full w-full h-[68%] glass-effect rounded-xl p-2 sm:p-4 custom-shadow">
+                    <!-- This div provides the weather forecast of present day -->
+                    <div class="flex items-center justify-between p-3 sm:p-6 bg-white/10 rounded-xl hover-scale transition-all duration-300">
+                        <div class="information">
+                            <h3 id="city_name" class="text-lg sm:text-2xl font-medium mb-2 sm:mb-3"></h3>
+                            <p id="temp" class="text-base sm:text-lg mb-1 sm:mb-2"></p>
+                            <p id="wind" class="text-base sm:text-lg mb-1 sm:mb-2"></p>
+                            <p id="humidity" class="text-base sm:text-lg"></p>
+                        </div>
+                        <div class="img">
+                            <img id="weather_img" src="" alt="" width="80" height="80" class="sm:w-[120px] sm:h-[120px] drop-shadow-lg weather-icon-animate" />
+                            <p id="weather_description" class="text-center mt-1 sm:mt-2 text-sm sm:text-lg"></p>
+                        </div>
                     </div>
-                </div>
-            </section>
-        </main>
-    </div>
-</body>
+                    <!-- This div provides the 5 day forecast details -->
+                    <div class="flex flex-col mt-4 sm:mt-8 gap-2 sm:gap-4">
+                        <h3 class="text-xl sm:text-2xl font-medium">5 Days Forecast</h3>
+                        <div id="card_container" class="flex items-center gap-2 sm:gap-4 overflow-x-auto pt-2 sm:pt-4 pb-2 sm:pb-4">
+                        <!-- Dynamically generated cards will be displayed here on the webpage -->
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+    </body>
 
 </html>
