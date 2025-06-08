@@ -99,7 +99,7 @@ function getDailyForecast(list) {
     });
 }
 
-// Error Handling Function - displays error message
+// Error Handling Function - displays error message with specific error types
 const handleError = (error) => {
     console.error(error);
     
@@ -112,14 +112,57 @@ const handleError = (error) => {
     weatherDescription.innerHTML = '';
     cardContainer.innerHTML = '';
 
-    // Create and display error message
+    // Create and display error message based on error type
     const errorDiv = document.createElement('div');
     errorDiv.className = 'text-center p-4 bg-red-500/20 rounded-lg text-white';
+    
+    let errorMessage = '';
+    // Handle different types of errors with specific messages
+    if (error.message === 'Empty city name') {
+        errorMessage = 'Please enter a city name';
+    } else if (error.message === 'Invalid city name') {
+        errorMessage = 'Please enter a valid city name';
+    } else if (error.message === 'location not supported') {
+        errorMessage = 'Location is not supported by your browser';
+    } else if (error.message === 'location denied') {
+        errorMessage = 'Please allow location access to get weather for your current location';
+    } else if (error.message === 'location timeout') {
+        errorMessage = 'Location request timed out. Please try again';
+    } else if (error.message === 'Invalid API key') {
+        errorMessage = 'Invalid API key. Please check your API key';
+    } else if (error.message === 'City not found') {
+        errorMessage = 'City not found. Please check the spelling and try again';
+    } else if (error.message === 'API rate limit exceeded') {
+        errorMessage = 'Too many requests. Please try again later';
+    } else if (error.message === 'Network error') {
+        errorMessage = 'Network connection error. Please check your internet connection';
+    } else if (error.message === 'Server error') {
+        errorMessage = 'Weather service is temporarily unavailable. Please try again later';
+    } else {
+        errorMessage = 'An error occurred. Please try again';
+    }
+
     errorDiv.innerHTML = `
         <i class="fas fa-exclamation-circle text-2xl mb-2"></i>
-        <p class="font-medium">Invalid API key. Please check your API key.</p>
+        <p class="font-medium">${errorMessage}</p>
     `;
     cardContainer.appendChild(errorDiv);
+};
+
+// Input validation function
+const validateCityInput = (city) => {
+    // Remove any special characters and extra spaces
+    const sanitizedCity = city.trim().replace(/[^a-zA-Z\s]/g, '');
+    
+    if (!sanitizedCity) {
+        throw new Error('Empty city name');
+    }
+    
+    if (sanitizedCity.length < 2) {
+        throw new Error('Invalid city name');
+    }
+    
+    return sanitizedCity;
 };
 
 // Fetches weather data for a specific city
@@ -130,12 +173,33 @@ const getWeatherByCityName = async (city = "kolkata") => {
             `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${OPENWEATHERMAP_API_KEY}&units=metric`
         );
         
+        // Handle different HTTP status codes
         if (!response.ok) {
-            throw new Error('Invalid API key');
+            switch (response.status) {
+                case 400:
+                    throw new Error('Invalid city name');
+                case 401:
+                    throw new Error('Invalid API key');
+                case 404:
+                    throw new Error('City not found');
+                case 429:
+                    throw new Error('API rate limit exceeded');
+                case 500:
+                case 502:
+                case 503:
+                case 504:
+                    throw new Error('Server error');
+                default:
+                    throw new Error('Network error');
+            }
         }
         
         const data = await response.json();
-        if (data.cod !== "200") throw new Error('Invalid API key');
+        
+        // Validate API response data
+        if (data.cod !== "200") {
+            throw new Error('City not found');
+        }
 
         // Clear previous error messages
         cardContainer.innerHTML = '';
@@ -162,7 +226,12 @@ const getWeatherByCityName = async (city = "kolkata") => {
             </div>`;
         });
     } catch (err) {
-        handleError(err);
+        // Handle network errors
+        if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
+            handleError(new Error('Network error'));
+        } else {
+            handleError(err);
+        }
     }
 };
 
@@ -170,14 +239,35 @@ const getWeatherByCityName = async (city = "kolkata") => {
 const getWeatherByCurrentLocation = async (latitude, longitude) => {
     try {
         // Fetch weather data using coordinates
-        const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${OPENWEATHERMAP_API_KEY}&units=metric`);
+        const response = await fetch(
+            `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${OPENWEATHERMAP_API_KEY}&units=metric`
+        );
         
+        // Handle different HTTP status codes
         if (!response.ok) {
-            throw new Error('Invalid API key');
+            switch (response.status) {
+                case 400:
+                    throw new Error('Invalid coordinates');
+                case 401:
+                    throw new Error('Invalid API key');
+                case 429:
+                    throw new Error('API rate limit exceeded');
+                case 500:
+                case 502:
+                case 503:
+                case 504:
+                    throw new Error('Server error');
+                default:
+                    throw new Error('Network error');
+            }
         }
         
         const data = await response.json();
-        if (data.cod !== "200") throw new Error('Invalid API key');
+        
+        // Validate API response data
+        if (data.cod !== "200") {
+            throw new Error('Location data not found');
+        }
 
         // Clear previous error messages
         cardContainer.innerHTML = '';
@@ -204,7 +294,12 @@ const getWeatherByCurrentLocation = async (latitude, longitude) => {
             </div>`;
         });
     } catch (err) {
-        handleError(err);
+        // Handle network errors
+        if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
+            handleError(new Error('Network error'));
+        } else {
+            handleError(err);
+        }
     }
 };
 
@@ -212,20 +307,18 @@ const getWeatherByCurrentLocation = async (latitude, longitude) => {
 searchButton.addEventListener("click", (e) => {
     e.preventDefault();
     if (radioCity.checked) {
-        const cityName = cityInput.value.trim().toLowerCase();
+        try {
+            const cityName = validateCityInput(cityInput.value);
 
-        // Validate city input
-        if (!cityName) {
-            handleError(new Error('Invalid API key'));
-            return;
+            // Store new city names in local storage
+            if (!cityNamesList.includes(cityName)) {
+                cityNamesList.push(cityName);
+                localStorage.setItem("cityNamesList", JSON.stringify(cityNamesList));
+            }
+            getWeatherByCityName(cityName);
+        } catch (error) {
+            handleError(error);
         }
-
-        // Store new city names in local storage
-        if (!cityNamesList.includes(cityName)) {
-            cityNamesList.push(cityName);
-            localStorage.setItem("cityNamesList", JSON.stringify(cityNamesList));
-        }
-        getWeatherByCityName(cityName);
     } else {
         // Handle current location weather
         if (navigator.geolocation) {
@@ -235,12 +328,31 @@ searchButton.addEventListener("click", (e) => {
                     const longitude = position.coords.longitude;
                     getWeatherByCurrentLocation(latitude, longitude);
                 },
-                (err) => {
-                    handleError(err);
+                (error) => {
+                    let errorMessage;
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'Geolocation denied';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'Location information is unavailable';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'Geolocation timeout';
+                            break;
+                        default:
+                            errorMessage = 'An error occurred while getting location';
+                    }
+                    handleError(new Error(errorMessage));
+                },
+                {
+                    timeout: 10000, // 10 seconds timeout
+                    maximumAge: 0,
+                    enableHighAccuracy: true
                 }
             );
         } else {
-            handleError(new Error('Invalid API key'));
+            handleError(new Error('Geolocation not supported'));
         }
     }
 });
